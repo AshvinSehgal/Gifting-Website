@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home - GFT Clone{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Personalized Gifts for Every Occasion</h1>
+        <p>Make your loved ones feel special with customized gifts</p>
+        <a href="#featured" class="btn">Shop Now</a>
+    </div>
+</section>
+
+<section id="featured" class="featured-products">
+    <div class="container">
+        <h2>Featured Products</h2>
+        <div class="product-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}">
+                <h3>{{ product['name'] }}</h3>
+                <p class="price">₹{{ "%.2f"|format(product['price']) }}</p>
+                <div class="product-actions">
+                    <a href="{{ url_for('product_detail', product_id=product['id']) }}" class="btn">View Details</a>
+                    {% if product['customizable'] %}
+                    <a href="{{ url_for('customize', product_id=product['id']) }}" class="btn outline">Customize</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="customizable-products">
+    <div class="container">
+        <h2>Create Your Own Custom Gifts</h2>
+        <div class="product-grid">
+            {% for product in customizable_products %}
+            <div class="product-card">
+                <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}">
+                <h3>{{ product['name'] }}</h3>
+                <p class="price">₹{{ "%.2f"|format(product['price']) }}</p>
+                <div class="product-actions">
+                    <a href="{{ url_for('customize', product_id=product['id']) }}" class="btn">Customize Now</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="categories">
+    <div class="container">
+        <h2>Shop by Category</h2>
+        <div class="category-grid">
+            <a href="{{ url_for('search', category='rakhis') }}" class="category-card">
+                <img src="{{ url_for('static', filename='images/rakhis.jpg') }}" alt="Rakhis">
+                <h3>Rakhis</h3>
+            </a>
+            <a href="{{ url_for('search', category='soaps') }}" class="category-card">
+                <img src="{{ url_for('static', filename='images/soaps.jpg') }}" alt="Soaps">
+                <h3>Soaps</h3>
+            </a>
+            <a href="{{ url_for('search', category='bath-salts') }}" class="category-card">
+                <img src="{{ url_for('static', filename='images/bath-salts.jpg') }}" alt="Bath Salts">
+                <h3>Bath Salts</h3>
+            </a>
+            <a href="{{ url_for('search', category='candles') }}" class="category-card">
+                <img src="{{ url_for('static', filename='images/candles.jpg') }}" alt="Candles">
+                <h3>Candles</h3>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update cart count
+    fetch('/cart_count')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.cart-count').textContent = data.count;
+        });
+</script>
+{% endblock %}

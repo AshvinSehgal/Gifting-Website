@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Customize {{ product['name'] }} - GFT Clone{% endblock %}
+
+{% block content %}
+<section class="customize-product">
+    <div class="container">
+        <h1>Customize Your {{ product['name'] }}</h1>
+        
+        <div class="customize-wrapper">
+            <div class="product-preview">
+                <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}" id="custom-preview">
+                <div class="custom-text-preview" id="custom-text-preview">Your Text Here</div>
+            </div>
+            
+            <div class="customize-options">
+                <form method="POST" action="{{ url_for('customize', product_id=product['id']) }}">
+                    <div class="form-group">
+                        <label for="custom-text">Custom Text</label>
+                        <input type="text" id="custom-text" name="customization" placeholder="Enter your custom text" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="text-color">Text Color</label>
+                        <input type="color" id="text-color" value="#000000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="text-size">Text Size</label>
+                        <select id="text-size">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    
+                    <div class="price-summary">
+                        <p>Base Price: ₹{{ "%.2f"|format(product['price']) }}</p>
+                        <p>Customization Fee: ₹100.00</p>
+                        <p class="total">Total: ₹{{ "%.2f"|format(product['price'] + 100) }}</p>
+                    </div>
+                    
+                    <button type="submit" class="btn">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update preview in real-time
+    const textInput = document.getElementById('custom-text');
+    const colorInput = document.getElementById('text-color');
+    const sizeInput = document.getElementById('text-size');
+    const preview = document.getElementById('custom-text-preview');
+    
+    textInput.addEventListener('input', updatePreview);
+    colorInput.addEventListener('input', updatePreview);
+    sizeInput.addEventListener('change', updatePreview);
+    
+    function updatePreview() {
+        preview.textContent = textInput.value || 'Your Text Here';
+        preview.style.color = colorInput.value;
+        
+        switch(sizeInput.value) {
+            case 'small':
+                preview.style.fontSize = '16px';
+                break;
+            case 'medium':
+                preview.style.fontSize = '24px';
+                break;
+            case 'large':
+                preview.style.fontSize = '32px';
+                break;
+        }
+    }
+</script>
+{% endblock %}

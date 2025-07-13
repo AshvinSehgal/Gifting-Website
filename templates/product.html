@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product['name'] }} - GFT Clone{% endblock %}
+
+{% block content %}
+<section class="product-detail">
+    <div class="container">
+        <div class="product-images">
+            <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}" id="main-image">
+        </div>
+        <div class="product-info">
+            <h1>{{ product['name'] }}</h1>
+            <div class="product-price">
+            <p>₹{{ "%.2f"|format(product['price']) }}</p>
+            </div>
+            <div class="product-description">
+                <p>{{ product['description'] }}</p>
+            </div>
+            
+            <form id="add-to-cart-form" class="product-actions">
+                <input type="hidden" name="product_id" value="{{ product['id'] }}">
+                <div class="quantity-selector">
+                    <button type="button" class="quantity-btn minus">-</button>
+                    <input type="number" name="quantity" value="1" min="1" class="quantity-input">
+                    <button type="button" class="quantity-btn plus">+</button>
+                </div>
+                <button type="submit" class="btn">Add to Cart</button>
+                {% if product['customizable'] %}
+                <a href="{{ url_for('customize', product_id=product['id']) }}" class="btn outline">Customize This Product</a>
+                {% endif %}
+            </form>
+            
+            <div class="product-meta">
+                <div class="meta-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Free shipping on orders over ₹999</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-undo"></i>
+                    <span>Easy returns within 7 days</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure payment options</span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <span>Dimensions: {{product['length']}} X {{product['width']}} X {{product['height']}} CM</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="related-products">
+    <div class="container">
+        <h2>You May Also Like</h2>
+        <div class="product-grid">
+            {% for product in related_products %}
+            <div class="product-card">
+                <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}">
+                <h3>{{ product['name'] }}</h3>
+                <p class="price">₹{{ "%.2f"|format(product['price']) }}</p>
+                <div class="product-actions">
+                    <a href="{{ url_for('product_detail', product_id=product['id']) }}" class="btn">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Quantity selector
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('.quantity-input');
+            let value = parseInt(input.value);
+            
+            if (this.classList.contains('minus') && value > 1) {
+                input.value = value - 1;
+            } else if (this.classList.contains('plus')) {
+                input.value = value + 1;
+            }
+        });
+    });
+    
+    // Add to cart
+    document.getElementById('add-to-cart-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('/add_to_cart', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart!');
+                // Update cart count
+                document.querySelector('.cart-count').textContent = parseInt(document.querySelector('.cart-count').textContent) + 1;
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+</script>
+{% endblock %}

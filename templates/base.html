@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpalFlam - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="{{ url_for('index') }}">OpalFlam</a>
+            </div>
+            <div class="search-bar">
+                <form action="{{ url_for('search') }}" method="get">
+                    <input type="text" name="q" placeholder="Search for gifts..." value="{{ request.args.get('q', '') }}">
+                    <select name="category">
+                        <option value="">All Categories</option>
+                        <option value="gifts" {% if request.args.get('category') == 'gifts' %}selected{% endif %}>Gifts</option>
+                        <option value="home-decor" {% if request.args.get('category') == 'home-decor' %}selected{% endif %}>Home Decor</option>
+                        <option value="food" {% if request.args.get('category') == 'food' %}selected{% endif %}>Food</option>
+                        <option value="toys" {% if request.args.get('category') == 'toys' %}selected{% endif %}>Toys</option>
+                    </select>
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="#">Categories</a></li>
+                    <li><a href="#">Custom Gifts</a></li>
+                    {% if 'user_id' in session %}
+                        <li><a href="{{ url_for('account') }}">My Account</a></li>
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('register') }}">Register</a></li>
+                    {% endif %}
+                    <li>
+                        <a href="{{ url_for('cart') }}" class="cart-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>GFT Clone is your one-stop destination for personalized gifts and unique presents for all occasions.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Products</a></li>
+                    <li><a href="#">Custom Gifts</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p><i class="fa-solid fa-envelope"></i> opalflam@gmail.com</p>
+                <p><i class="fa-solid fa-phone"></i> +91 9650303237</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 OpalFlam. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

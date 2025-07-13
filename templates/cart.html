@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Your Shopping Cart - GFT Clone{% endblock %}
+
+{% block content %}
+<section class="shopping-cart">
+    <div class="container">
+        <h1>Your Shopping Cart</h1>
+        
+        {% if cart_items %}
+        <div class="cart-items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td class="cart-product-info">
+                            <img src="{{ url_for('static', filename='images/' + (item['product_image'] if item['product_image'] else 'custom.jpg')) }}" alt="{{ item['product_name'] or 'Custom Product' }}">
+                            <div>
+                                <h3>{{ item['product_name'] or 'Custom: ' + item['customization_details'] }}</h3>
+                                {% if item['customization_details'] %}
+                                <p class="custom-details">{{ item['customization_details'] }}</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="price">
+                            ₹{{ "%.2f"|format(item['custom_price'] if item['custom_product_id'] else item['product_price']) }}
+                        </td>
+                        <td class="quantity">
+                            <form class="update-quantity-form">
+                                <input type="hidden" name="cart_id" value="{{ item['id'] }}">
+                                <div class="quantity-selector">
+                                    <button type="button" class="quantity-btn minus">-</button>
+                                    <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1" class="quantity-input">
+                                    <button type="button" class="quantity-btn plus">+</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td class="total">
+                            ₹{{ "%.2f"|format((item['custom_price'] if item['custom_product_id'] else item['product_price']) * item['quantity']) }}
+                        </td>
+                        <td class="actions">
+                            <a href="{{ url_for('remove_from_cart', cart_id=item['id']) }}" class="remove-btn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="cart-summary">
+            <div class="summary-card">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₹{{ "%.2f"|format(total) }}</span>
+                </div>
+                <a href="{{ url_for('checkout') }}" class="btn">Proceed to Checkout</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything to your cart yet</p>
+            <a href="{{ url_for('index') }}" class="btn">Continue Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Quantity selector
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('.quantity-input');
+            let value = parseInt(input.value);
+            
+            if (this.classList.contains('minus')) {
+                if (value > 1) {
+                    input.value = value - 1;
+                    updateCartItem(this.closest('form'));
+                } else {
+                    if (confirm('Remove this item from cart?')) {
+                        const cartId = this.closest('form').querySelector('input[name="cart_id"]').value;
+                        window.location.href = `/remove_from_cart/${cartId}`;
+                    }
+                }
+            } else if (this.classList.contains('plus')) {
+                input.value = value + 1;
+                updateCartItem(this.closest('form'));
+            }
+        });
+    });
+    
+    // Update quantity when manually changed
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.value < 1) this.value = 1;
+            updateCartItem(this.closest('form'));
+        });
+    });
+    
+    function updateCartItem(form) {
+        const formData = new FormData(form);
+        
+        fetch('/update_cart', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload to update totals
+                window.location.reload();
+            }
+        });
+    }
+</script>
+{% endblock %}

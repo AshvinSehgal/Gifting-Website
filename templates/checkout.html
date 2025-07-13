@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - IGP Clone{% endblock %}
+
+{% block content %}
+{% if razorpay_order_id %}
+<section class="checkout-payment">
+    <div class="container">
+        <h1>Complete Your Payment</h1>
+        <div class="checkout-wrapper">
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ "%.2f"|format(amount) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₹{{ "%.2f"|format(amount) }}</span>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <button id="rzp-button" class="btn">Pay with Razorpay</button>
+                <p class="secure-payment">
+                    <i class="fas fa-lock"></i> Secure payment processing
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% else %}
+<section class="checkout">
+    <div class="container">
+        <h1>Checkout</h1>
+        
+        <div class="checkout-wrapper">
+            <div class="checkout-form">
+                <h2>Shipping Information</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" value="{{ user['username'] }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ user['email'] }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" value="{{ user['phone'] or '' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Shipping Address</label>
+                        <textarea id="address" name="address" rows="4" required>{{ user['address'] or '' }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Proceed to Payment</button>
+                </form>
+            </div>
+            
+            <div class="order-summary">
+                <h2>Your Order</h2>
+                <div class="order-items">
+                    {% for item in cart_items %}
+                    <div class="order-item">
+                        <div class="item-info">
+                            <h4>{{ item['product_name'] or 'Custom: ' + item['customization_details'] }}</h4>
+                            <p>Qty: {{ item['quantity'] }}</p>
+                        </div>
+                        <div class="item-price">
+                            ₹{{ "%.2f"|format((item['custom_price'] if item['custom_product_id'] else item['product_price']) * item['quantity']) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="summary-total">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if razorpay_order_id %}
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount * 100 }}",
+        "currency": "INR",
+        "name": "IGP Clone",
+        "description": "Order Payment",
+        "image": "{{ url_for('static', filename='images/logo.png') }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            // Submit payment details to your server
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/payment_success';
+            
+            const razorpay_payment_id = document.createElement('input');
+            razorpay_payment_id.type = 'hidden';
+            razorpay_payment_id.name = 'razorpay_payment_id';
+            razorpay_payment_id.value = response.razorpay_payment_id;
+            form.appendChild(razorpay_payment_id);
+            
+            const razorpay_order_id = document.createElement('input');
+            razorpay_order_id.type = 'hidden';
+            razorpay_order_id.name = 'razorpay_order_id';
+            razorpay_order_id.value = response.razorpay_order_id;
+            form.appendChild(razorpay_order_id);
+            
+            const razorpay_signature = document.createElement('input');
+            razorpay_signature.type = 'hidden';
+            razorpay_signature.name = 'razorpay_signature';
+            razorpay_signature.value = response.razorpay_signature;
+            form.appendChild(razorpay_signature);
+            
+            document.body.appendChild(form);
+            form.submit();
+        },
+        "prefill": {
+            "name": "{{ user['username'] }}",
+            "email": "{{ user['email'] }}",
+            "contact": "{{ user['phone'] or '' }}"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    
+    var rzp = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = function(e) {
+        rzp.open();
+        e.preventDefault();
+    }
+</script>
+{% endif %}
+{% endblock %}
