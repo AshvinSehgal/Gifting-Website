@@ -6,11 +6,13 @@
 <section class="auth-section">
     <div class="container">
         <div class="auth-card">
+            <br/>
             <h2>Login to Your Account</h2>
+            <br/>
             <form method="POST" action="{{ url_for('login') }}" class="auth-form">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <label for="email">Email or Username</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email or username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -19,6 +21,7 @@
                 <button type="submit" class="btn">Login</button>
             </form>
             <p class="auth-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            <br/>
         </div>
     </div>
 </section>

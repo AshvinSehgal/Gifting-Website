@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Your Shopping Cart - GFT Clone{% endblock %}
+{% block title %}Your Shopping Cart - OpalFlam{% endblock %}
 
 {% block content %}
 <section class="shopping-cart">
@@ -61,11 +61,15 @@
                 <h3>Order Summary</h3>
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span>₹{{ "%.2f"|format(total) }}</span>
+                    <span>₹{{ "%.2f"|format(subtotal) }}</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>
+                    {% if(total < 999)%}
+                    <span>₹{{ "%.2f"|format(shipping_charges) }}</span>
+                    {%else%}
                     <span>Free</span>
+                    {%endif%}
                 </div>
                 <div class="summary-row total">
                     <span>Total</span>

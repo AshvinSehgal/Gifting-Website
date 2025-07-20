@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Home - GFT Clone{% endblock %}
+{% block title %}Home - OpalFlam{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -10,10 +10,10 @@
         <a href="#featured" class="btn">Shop Now</a>
     </div>
 </section>
-
+<br/>
 <section id="featured" class="featured-products">
     <div class="container">
-        <h2>Featured Products</h2>
+        <h1>Featured Products</h1>
         <div class="product-grid">
             {% for product in featured_products %}
             <div class="product-card">
@@ -31,10 +31,10 @@
         </div>
     </div>
 </section>
-
+<br/>
 <section class="customizable-products">
     <div class="container">
-        <h2>Create Your Own Custom Gifts</h2>
+        <h1>Create Your Own Custom Gifts</h1>
         <div class="product-grid">
             {% for product in customizable_products %}
             <div class="product-card">
@@ -49,7 +49,7 @@
         </div>
     </div>
 </section>
-
+<br/>
 <section class="categories">
     <div class="container">
         <h2>Shop by Category</h2>

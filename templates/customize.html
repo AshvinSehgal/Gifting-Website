@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Customize {{ product['name'] }} - GFT Clone{% endblock %}
+{% block title %}Customize {{ product['name'] }} - OpalFlam{% endblock %}
 
 {% block content %}
 <section class="customize-product">
@@ -10,7 +10,6 @@
         <div class="customize-wrapper">
             <div class="product-preview">
                 <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}" id="custom-preview">
-                <div class="custom-text-preview" id="custom-text-preview">Your Text Here</div>
             </div>
             
             <div class="customize-options">
@@ -32,6 +31,24 @@
                             <option value="medium" selected>Medium</option>
                             <option value="large">Large</option>
                         </select>
+                    </div>
+
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-truck"></i>
+                            <span>Free shipping on orders over ₹999</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-undo"></i>
+                            <span>Easy returns within 7 days</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure payment options</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <span>Dimensions: {{product['length']}} X {{product['width']}} X {{product['height']}} CM</span>
                     </div>
                     
                     <div class="price-summary">

@@ -21,7 +21,7 @@ SHIPROCKET_PASSWORD = 'your_shiprocket_password'
 SHIPROCKET_TOKEN = None
 
 def get_db_connection():
-    conn = sqlite3.connect('GFT_clone.db')
+    conn = sqlite3.connect('inventory.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -94,9 +94,9 @@ def customize(product_id):
         # Save the custom product (in a real app, you'd save the customized image)
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO custom_products (base_product_id, user_id, customization_details, price)
-        VALUES (?, ?, ?, ?)
-        ''', (product_id, session['user_id'], customization, price))
+        INSERT INTO custom_products (base_product_id, user_id, customization_details, length, width, height, price)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (product_id, session['user_id'], customization, 10, 1, 1, price))
         custom_product_id = cursor.lastrowid
         
         # Add to cart
@@ -116,7 +116,10 @@ def customize(product_id):
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'Please login first'})
+        flash('Please login first', 'warning')
+        return jsonify({'login_required': True})
+    # if 'user_id' not in session:
+    #     return jsonify({'success': False, 'message': 'Please login first'})
     
     product_id = request.form.get('product_id')
     quantity = int(request.form.get('quantity', 1))
@@ -143,6 +146,7 @@ def add_to_cart():
     
     conn.commit()
     conn.close()
+    flash('Custom product added to cart!', 'success')
     return jsonify({'success': True, 'message': 'Product added to cart'})
 
 @app.route('/cart')
@@ -162,15 +166,23 @@ def cart():
     WHERE c.user_id = ?
     ''', (session['user_id'],)).fetchall()
     
-    total = 0
+    subtotal = 0
     for item in cart_items:
         if item['custom_product_id']:
-            total += item['custom_price'] * item['quantity']
+            subtotal += item['custom_price'] * item['quantity']
         else:
-            total += item['product_price'] * item['quantity']
+            subtotal += item['product_price'] * item['quantity']
+    
+    shipping_charges = 0
+    total = subtotal
+    if subtotal < 999:
+        shipping_charges = 99
+    else:
+        shipping_charges = 0
+    total = subtotal + shipping_charges
     
     conn.close()
-    return render_template('cart.html', cart_items=cart_items, total=total)
+    return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, shipping_charges=shipping_charges, total=total)
 
 @app.route('/update_cart', methods=['POST'])
 def update_cart():
@@ -393,11 +405,13 @@ def payment_success():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email_username = request.form.get('email')
         password = request.form.get('password')
+        address = request.form.get('address')
+        phone = request.form.get('phone')
         
         conn = get_db_connection()
-        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE email = ? OR username = ?', (email_username,email_username)).fetchone()
         conn.close()
         
         if user and check_password_hash(user['password'], password):

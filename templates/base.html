@@ -35,8 +35,7 @@
                         <li><a href="{{ url_for('account') }}">My Account</a></li>
                         <li><a href="{{ url_for('logout') }}">Logout</a></li>
                     {% else %}
-                        <li><a href="{{ url_for('login') }}">Login</a></li>
-                        <li><a href="{{ url_for('register') }}">Register</a></li>
+                        <li><a href="{{ url_for('login') }}">Login|Register</a></li>
                     {% endif %}
                     <li>
                         <a href="{{ url_for('cart') }}" class="cart-icon">
@@ -67,7 +66,7 @@
         <div class="container">
             <div class="footer-section">
                 <h3>About Us</h3>
-                <p>GFT Clone is your one-stop destination for personalized gifts and unique presents for all occasions.</p>
+                <p>OpalFlam is your one-stop destination for personalized gifts and unique presents for all occasions.</p>
             </div>
             <div class="footer-section">
                 <h3>Quick Links</h3>

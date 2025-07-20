@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product['name'] }} - GFT Clone{% endblock %}
+{% block title %}{{ product['name'] }} - OpalFlam{% endblock %}
 
 {% block content %}
 <section class="product-detail">
@@ -98,7 +98,10 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if(data.login_required) {
+                window.location.href = '/login';
+            }
+            else if (data.success) {
                 alert('Product added to cart!');
                 // Update cart count
                 document.querySelector('.cart-count').textContent = parseInt(document.querySelector('.cart-count').textContent) + 1;
