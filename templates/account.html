@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - IGP Clone{% endblock %}
+
+{% block content %}
+<section class="account-section">
+    <div class="container">
+        <div class="account-header">
+            <h1>My Account</h1>
+            <p>Welcome back, {{ user.first_name }}!</p>
+        </div>
+        
+        <div class="account-container">
+            <div class="account-sidebar">
+                <ul>
+                    <li class="active"><a href="{{ url_for('account') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('account_orders') }}">My Orders</a></li>
+                    <li><a href="{{ url_for('account_addresses') }}">Addresses</a></li>
+                    <li><a href="{{ url_for('account_settings') }}">Account Details</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </div>
+            
+            <div class="account-content">
+                <div class="account-overview">
+                    <h2>Account Overview</h2>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="overview-details">
+                                <h3>Total Orders</h3>
+                                <p>{{ order_count }}</p>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="overview-details">
+                                <h3>Pending Orders</h3>
+                                <p>{{ pending_orders }}</p>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="overview-details">
+                                <h3>Completed Orders</h3>
+                                <p>{{ completed_orders }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-orders">
+                    <h2>Recent Orders</h2>
+                    {% if recent_orders %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+                                <td>
+                                    <span class="order-status {{ order.status }}">
+                                        {{ order.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>₹{{ "%.2f"|format(order.total) }}</td>
+                                <td>
+                                    <a href="{{ url_for('order_detail', order_number=order.order_number) }}" class="btn btn-small">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <a href="{{ url_for('account_orders') }}" class="btn btn-outline">
+                            View All Orders
+                        </a>
+                    </div>
+                    {% else %}
+                    <p>You haven't placed any orders yet.</p>
+                    <a href="{{ url_for('search') }}" class="btn btn-primary">Start Shopping</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

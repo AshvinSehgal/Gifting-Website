@@ -186,6 +186,9 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
         sample_products = [
+            ("Rakhi", "rakhi", "Customized rakhis", 
+             "Rakhi", 149, 99, category_id, 100, 0.01, 10, 1, 1, 
+             "RAKHI-001", 1, 1, 100, "standard", "standard"),
             ("Personalized Photo Frame", "personalized-photo-frame", "Custom photo frame with your picture", 
              "Wooden frame with glass front", 599, 499, category_id, 100, 0.8, 12, 15, 2, 
              "PHFRM-001", 1, 1, 100, "standard", "fragile"),
@@ -204,17 +207,12 @@ def init_db():
         ''', sample_products)
         
         # Insert product images
-        cursor.execute("SELECT id FROM products WHERE slug = 'personalized-photo-frame'")
+        cursor.execute("SELECT id FROM products WHERE slug = 'rakhi'")
         product_id = cursor.fetchone()[0]
         cursor.execute('''
         INSERT INTO product_images (product_id, image_url, is_primary)
         VALUES (?, ?, ?)
-        ''', (product_id, "photo-frame.jpg", 1))
-        
-        cursor.execute('''
-        INSERT INTO product_images (product_id, image_url, is_primary)
-        VALUES (?, ?, ?)
-        ''', (product_id, "photo-frame-2.jpg", 0))
+        ''', (product_id, "bandhan.jpeg", 1))
 
     conn.commit()
     conn.close()

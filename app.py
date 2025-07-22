@@ -21,7 +21,7 @@ SHIPROCKET_PASSWORD = 'your_shiprocket_password'
 SHIPROCKET_TOKEN = None
 
 def get_db_connection():
-    conn = sqlite3.connect('inventory.db')
+    conn = sqlite3.connect('data/inventory.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -50,8 +50,14 @@ def index():
     conn = get_db_connection()
     featured_products = conn.execute('SELECT * FROM products LIMIT 6').fetchall()
     customizable_products = conn.execute('SELECT * FROM products WHERE customizable = 1 LIMIT 4').fetchall()
+    product_ids = [p['id'] for p in featured_products + customizable_products]
+    placeholders = ','.join(['?'] * len(product_ids))
+    product_imgs = conn.execute(f'SELECT * FROM product_images WHERE is_primary = 1 AND product_id IN ({placeholders})', product_ids)
+    product_imgs_dict = {img['product_id']: img['image_url'] for img in product_imgs}
+    featured_product_imgs = {p['id']: product_imgs_dict.get(p['id'], 'default.jpg') for p in featured_products}
+    customizable_product_imgs = {p['id']: product_imgs_dict.get(p['id'], 'default.jpg') for p in customizable_products}
     conn.close()
-    return render_template('index.html', featured_products=featured_products, customizable_products=customizable_products)
+    return render_template('index.html', featured_products=featured_products, customizable_products=customizable_products, featured_product_imgs=featured_product_imgs, customizable_product_imgs=customizable_product_imgs)
 
 @app.route('/search')
 def search():
@@ -65,18 +71,20 @@ def search():
     else:
         products = conn.execute('SELECT * FROM products WHERE name LIKE ?', 
                                ('%'+query+'%',)).fetchall()
+    product_imgs = conn.execute('SELECT * FROM product_images WHERE product_id IN ?', (products['id'],)).fetchall()
     conn.close()
-    return render_template('index.html', products=products, search_query=query)
+    return render_template('index.html', products=products, product_imgs=product_imgs, search_query=query)
 
 @app.route('/product/<int:product_id>')
 def product_detail(product_id):
     conn = get_db_connection()
     product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+    product_img = conn.execute('SELECT * FROM product_images WHERE product_id = ?', (product_id,)).fetchone()
     conn.close()
     if product is None:
         flash('Product not found', 'danger')
         return redirect(url_for('index'))
-    return render_template('product.html', product=product)
+    return render_template('product.html', product=product, product_img=product_img)
 
 @app.route('/customize/<int:product_id>', methods=['GET', 'POST'])
 def customize(product_id):
@@ -86,6 +94,7 @@ def customize(product_id):
     
     conn = get_db_connection()
     product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+    product_img = conn.execute('SELECT * FROM product_images WHERE is_primary = 1 AND product_id = ?', (product_id,)).fetchone()
     
     if request.method == 'POST':
         customization = request.form.get('customization')
@@ -111,7 +120,7 @@ def customize(product_id):
         return redirect(url_for('cart'))
     
     conn.close()
-    return render_template('customize.html', product=product)
+    return render_template('customize.html', product=product, product_img=product_img)
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -158,11 +167,12 @@ def cart():
     conn = get_db_connection()
     cart_items = conn.execute('''
     SELECT c.id, c.quantity, 
-           p.id as product_id, p.name as product_name, p.price as product_price, p.image_url as product_image,
+           p.id as product_id, p.name as product_name, p.price as product_price, i.image_url as product_image,
            cp.id as custom_product_id, cp.customization_details, cp.price as custom_price
     FROM cart c
     LEFT JOIN products p ON c.product_id = p.id
     LEFT JOIN custom_products cp ON c.custom_product_id = cp.id
+    LEFT JOIN product_images i ON (c.product_id = i.product_id OR c.custom_product_id = i.product_id)
     WHERE c.user_id = ?
     ''', (session['user_id'],)).fetchall()
     

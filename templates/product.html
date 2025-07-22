@@ -6,7 +6,7 @@
 <section class="product-detail">
     <div class="container">
         <div class="product-images">
-            <img src="{{ url_for('static', filename='images/' + product['image_url']) }}" alt="{{ product['name'] }}" id="main-image">
+            <img src="{{ url_for('static', filename='images/' + product_img['image_url']) }}" alt="{{ product['name'] }}" id="main-image">
         </div>
         <div class="product-info">
             <h1>{{ product['name'] }}</h1>

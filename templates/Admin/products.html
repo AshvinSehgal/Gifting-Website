@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Products - IGP Clone{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1>Manage Products</h1>
+            <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
+        
+        <div class="admin-actions">
+            <div class="search-box">
+                <input type="text" placeholder="Search products...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="filters">
+                <select>
+                    <option>All Categories</option>
+                    {% for category in categories %}
+                    <option>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <select>
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+        </div>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>
+                        <div class="product-cell">
+                            <img src="{{ url_for('static', filename='images/products/' + product.primary_image) }}" 
+                                 alt="{{ product.name }}" width="50">
+                            <div>
+                                <h4>{{ product.name }}</h4>
+                                <p>{{ product.sku }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ product.category.name }}</td>
+                    <td>
+                        ₹{{ "%.2f"|format(product.price) }}
+                        {% if product.sale_price %}
+                        <br><span class="sale-price">₹{{ "%.2f"|format(product.sale_price) }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.stock_quantity }}</td>
+                    <td>
+                        <span class="status-badge {{ 'active' if product.status == 'active' else 'inactive' }}">
+                            {{ product.status|capitalize }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" 
+                               class="btn btn-small btn-edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('admin_delete_product', product_id=product.id) }}" 
+                                  method="POST" class="delete-form">
+                                <button type="submit" class="btn btn-small btn-delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="pagination">
+            <a href="#" class="page-link disabled"><i class="fas fa-angle-left"></i></a>
+            <a href="#" class="page-link active">1</a>
+            <a href="#" class="page-link">2</a>
+            <a href="#" class="page-link">3</a>
+            <a href="#" class="page-link"><i class="fas fa-angle-right"></i></a>
+        </div>
+    </div>
+</div>
+{% endblock %}
